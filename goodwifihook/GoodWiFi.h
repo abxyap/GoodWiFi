@@ -2,8 +2,12 @@
 #import <notify.h>
 #import <Security/Security.h>
 #import <substrate.h>
+#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+#import <dlfcn.h>
 
-#import <prefs.h>
+#import <Preferences/PSListController.h>
+#import <Preferences/PSSpecifier.h>
 
 extern const char *__progname;
 

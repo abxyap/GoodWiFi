@@ -1,10 +1,15 @@
 #import <notify.h>
 #import <Social/Social.h>
-#import <prefs.h>
+#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+#import <Preferences/PSListController.h>
+#import <Preferences/PSSpecifier.h>
+#import <spawn.h>
+#import "rootless.h"
 
 #define NSLog(...)
 
-#define PLIST_PATH_Settings "/var/mobile/Library/Preferences/com.julioverne.goodwifi.plist"
+#define PLIST_PATH_Settings ROOT_PATH_NS(@"/var/mobile/Library/Preferences/com.julioverne.goodwifi.plist")
 
 @interface GoodWiFiSettingsController : PSListController
 {
@@ -130,7 +135,7 @@
 }
 - (void)reset
 {
-	[@{} writeToFile:@PLIST_PATH_Settings atomically:YES];
+	[@{} writeToFile:PLIST_PATH_Settings atomically:YES];
 	notify_post("com.julioverne.goodwifi/SettingsChanged");
 	[self reloadSpecifiers];
 	[self showPrompt];
@@ -139,9 +144,9 @@
 - (void)setPreferenceValue:(id)value specifier:(PSSpecifier *)specifier
 {
 	@autoreleasepool {
-		NSMutableDictionary *Prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:@PLIST_PATH_Settings]?:[NSMutableDictionary dictionary];
+		NSMutableDictionary *Prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:PLIST_PATH_Settings]?:[NSMutableDictionary dictionary];
 		Prefs[[specifier identifier]] = value;
-		[Prefs writeToFile:@PLIST_PATH_Settings atomically:YES];
+		[Prefs writeToFile:PLIST_PATH_Settings atomically:YES];
 		notify_post("com.julioverne.goodwifi/SettingsChanged");
 		if ([[specifier properties] objectForKey:@"PromptRespring"]) {
 			[self showPrompt];
@@ -151,13 +156,15 @@
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
 {
     if (alertView.tag == 55 && buttonIndex == 1) {
-        system("killall backboardd SpringBoard");
+        pid_t pid;
+		const char* args[] = {"sbreload", NULL};
+		posix_spawn(&pid, ROOT_PATH_C("/usr/bin/sbreload"), NULL, NULL, (char* const*)args, NULL);
     }
 }
 - (id)readPreferenceValue:(PSSpecifier*)specifier
 {
 	@autoreleasepool {
-		NSDictionary *Prefs = [[NSDictionary alloc] initWithContentsOfFile:@PLIST_PATH_Settings];
+		NSDictionary *Prefs = [[NSDictionary alloc] initWithContentsOfFile:PLIST_PATH_Settings];
 		return Prefs[[specifier identifier]]?:[specifier properties][@"default"];
 	}
 }

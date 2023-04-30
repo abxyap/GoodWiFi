@@ -1,9 +1,9 @@
 #import "GoodWiFi.h"
-
+#import "rootless.h"
 
 #define NSLog1(...)
 
-#define PLIST_PATH_Settings "/var/mobile/Library/Preferences/com.julioverne.goodwifi.plist"
+#define PLIST_PATH_Settings ROOT_PATH_NS(@"/var/mobile/Library/Preferences/com.julioverne.goodwifi.plist")
 
 static BOOL Enabled;
 static BOOL showKnowNetworks;
@@ -602,7 +602,7 @@ static WFNetworkListController* currDelegate;
 static void settingsChangedGoodWiFi(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo)
 {
 	@autoreleasepool {
-		NSDictionary *Prefs = [[[NSDictionary alloc] initWithContentsOfFile:@PLIST_PATH_Settings]?:@{} copy];
+		NSDictionary *Prefs = [[[NSDictionary alloc] initWithContentsOfFile:PLIST_PATH_Settings]?:@{} copy];
 		Enabled = (BOOL)[Prefs[@"Enabled"]?:@YES boolValue];
 		showKnowNetworks = (BOOL)[Prefs[@"showKnowNetworks"]?:@YES boolValue];
 		removeRSSILimit = (BOOL)[Prefs[@"removeRSSILimit"]?:@YES boolValue];
